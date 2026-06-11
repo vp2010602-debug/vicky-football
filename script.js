@@ -180,4 +180,94 @@ function renderResults(){
 }
 function copyRoomCode(){navigator.clipboard.writeText(roomCode);alert("Room code copied: "+roomCode)}
 function leaveRoom(){localStorage.removeItem("faa_room");localStorage.removeItem("faa_host");roomCode="";room=null;goHome()}
+let selectedXIPlayer = null;
+let manualXI = {};
+
+const FORMATIONS = {
+  "433": [["GK"],["DEF","DEF","DEF","DEF"],["MID","MID","MID"],["FWD","FWD","FWD"]],
+  "442": [["GK"],["DEF","DEF","DEF","DEF"],["MID","MID","MID","MID"],["FWD","FWD"]],
+  "352": [["GK"],["DEF","DEF","DEF"],["MID","MID","MID","MID","MID"],["FWD","FWD"]]
+};
+
+function buildFormationScreen(){
+  if(!room || !room.users || !room.users[myId]) return;
+
+  const me = room.users[myId];
+  const squad = squadArr(me);
+
+  $("formationSquad").innerHTML = squad.map((p,i)=>`
+    <div class="squadItem pickPlayer" onclick="selectXIPlayer('${i}')">
+      <span>${p.emoji || "⚽"} ${p.name} (${p.pos})</span>
+      <b>${p.rating}</b>
+    </div>
+  `).join("");
+
+  renderFormationPitch();
+}
+
+function changeFormation(){
+  manualXI = {};
+  renderFormationPitch();
+}
+
+function renderFormationPitch(){
+  const formation = $("formationSelect")?.value || "433";
+  const rows = FORMATIONS[formation];
+
+  $("formationPitch").innerHTML = rows.map((row,rowIndex)=>`
+    <div class="pitchRow">
+      ${row.map((slotType,slotIndex)=>{
+        const key = rowIndex + "_" + slotIndex;
+        const p = manualXI[key];
+        return `
+          <div class="slot ${p ? "filled" : ""}" onclick="assignToSlot('${key}','${slotType}')">
+            ${p ? `${p.emoji || "⚽"}<br>${p.name}<br><b>${p.rating}</b>` : slotType}
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `).join("");
+}
+
+function selectXIPlayer(index){
+  const me = room.users[myId];
+  selectedXIPlayer = squadArr(me)[index];
+
+  document.querySelectorAll(".pickPlayer").forEach(x=>x.classList.remove("selected"));
+  document.querySelectorAll(".pickPlayer")[index].classList.add("selected");
+}
+
+function assignToSlot(key, slotType){
+  if(!selectedXIPlayer) return alert("First select a player from your squad");
+
+  const pGroup = group(selectedXIPlayer.pos);
+
+  if(pGroup !== slotType){
+    return alert(`This slot needs ${slotType}, but selected player is ${pGroup}`);
+  }
+
+  for(const k in manualXI){
+    if(manualXI[k].name === selectedXIPlayer.name){
+      delete manualXI[k];
+    }
+  }
+
+  manualXI[key] = selectedXIPlayer;
+  renderFormationPitch();
+}
+
+async function saveManualXI(){
+  const xi = Object.values(manualXI);
+
+  if(xi.length !== 11){
+    return alert("Select exactly 11 players macha");
+  }
+
+  const rating = xi.reduce((sum,p)=>sum + p.rating,0);
+
+  await db.ref(`rooms/${roomCode}/users/${myId}/manualXI`).set(xi);
+  await db.ref(`rooms/${roomCode}/users/${myId}/manualXIRating`).set(rating);
+
+  alert("Formation saved successfully 🔥");
+}
 if(roomCode)listenRoom();
