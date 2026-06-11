@@ -40,17 +40,51 @@ function bestXI(u){let s=squadArr(u).sort((a,b)=>b.rating-a.rating);let need={GK
 function finalScore(u){let xi=bestXI(u), score=xi.reduce((a,p)=>a+p.rating,0); if(squadComplete(u))score+=25; if(fullSquadComplete(u))score+=50; score+=Math.floor((u.purse||0)/1000); return score}
 
 async function createRoom(){
-  const name=$("hostName").value.trim(); 
-  const team=$("hostTeam").value.trim() || name + " FC";
-  const logo=$("hostLogo").value.trim() || "⚽";
-  if(!name)return alert("Enter your name macha");
-  roomCode=makeCode(); myName=name; isHost=true;
-  localStorage.setItem("faa_room",roomCode); localStorage.setItem("faa_name",myName); localStorage.setItem("faa_host","yes");
+  const name = $("hostName").value.trim();
+  const team = $("hostTeam") ? $("hostTeam").value.trim() || name + " FC" : name + " FC";
+  const logo = $("hostLogo") ? $("hostLogo").value.trim() || "⚽" : "⚽";
+
+  if(!name) return alert("Enter your name macha");
+
+  roomCode = makeCode();
+  myName = name;
+  isHost = true;
+
+  localStorage.setItem("faa_room", roomCode);
+  localStorage.setItem("faa_name", myName);
+  localStorage.setItem("faa_host", "yes");
+
   const budget = Number($("budgetSelect").value);
   const pin = $("hostPin").value.trim() || "1234";
-  await db.ref("rooms/"+roomCode).set({createdAt:Date.now(),status:"lobby",hostId:myId,hostPin:pin,budget,index:0,currentBid:0,highestBidderId:"",highestBidderName:"",sold:{},unsold:{},history:{},players:shuffle(PLAYERS)});
-  await db.ref(`rooms/${roomCode}/users/${myId}`).set({name:myName,team:team,logo:logo,purse:budget,squad:{},score:0,joinedAt:Date.now()});
-  listenRoom(); show("lobby");
+
+  await db.ref("rooms/" + roomCode).set({
+    createdAt: Date.now(),
+    status: "lobby",
+    hostId: myId,
+    hostPin: pin,
+    budget: budget,
+    index: 0,
+    currentBid: 0,
+    highestBidderId: "",
+    highestBidderName: "",
+    sold: {},
+    unsold: {},
+    history: {},
+    players: shuffle(PLAYERS)
+  });
+
+  await db.ref(`rooms/${roomCode}/users/${myId}`).set({
+    name: myName,
+    team: team,
+    logo: logo,
+    purse: budget,
+    squad: {},
+    score: 0,
+    joinedAt: Date.now()
+  });
+
+  listenRoom();
+  show("lobby");
 }
 
 async function joinRoom(){
