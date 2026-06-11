@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Football Auction Arena Pro</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="bg"></div>
+  <main class="app">
+    <section id="home" class="screen active">
+      <div class="hero">
+        <div class="badge">⚽ Pro Multiplayer Auction</div>
+        <h1>Football Auction Arena</h1>
+        <p>Create a room, invite friends, bid live from your own devices and build your dream squad.</p>
+      </div>
+      <div class="card grid2">
+        <button class="bigBtn primary" onclick="showCreate()">Create Room</button>
+        <button class="bigBtn" onclick="showJoin()">Join Room</button>
+      </div>
+      <div class="rules"><b>Rules:</b> 2–8 players • 100 Cr purse • 15-player squad • Auto sell • Best XI + leaderboard</div>
+    </section>
+
+    <section id="createScreen" class="screen">
+      <div class="top"><button onclick="goHome()">←</button><h2>Create Room</h2></div>
+      <div class="card">
+        <label>Your Name</label><input id="hostName" placeholder="Example: Vignesh"/>
+        <label>Budget</label><select id="budgetSelect"><option value="10000">100 Cr</option><option value="20000">200 Cr</option></select>
+        <label>Timer per player</label><select id="timerSelect"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select>
+        <label>Host PIN</label><input id="hostPin" placeholder="Example: 1234" maxlength="8"/>
+        <button class="bigBtn primary" onclick="createRoom()">Create Auction Room</button>
+      </div>
+    </section>
+
+    <section id="joinScreen" class="screen">
+      <div class="top"><button onclick="goHome()">←</button><h2>Join Room</h2></div>
+      <div class="card">
+        <label>Your Name</label><input id="joinName" placeholder="Example: Rohit"/>
+        <label>Room Code</label><input id="roomCodeInput" placeholder="Example: AB12CD" maxlength="6"/>
+        <button class="bigBtn primary" onclick="joinRoom()">Join Auction</button>
+      </div>
+    </section>
+
+    <section id="lobby" class="screen">
+      <div class="top"><button onclick="leaveRoom()">←</button><h2>Lobby</h2></div>
+      <div class="roomBox"><span>Room Code</span><b id="roomCodeText">------</b><button onclick="copyRoomCode()">Copy</button></div>
+      <div class="card">
+        <h3>Players Joined</h3>
+        <div id="lobbyPlayers" class="playersList"></div>
+        <div id="hostLobbyControls" class="hidden"><button class="bigBtn primary" onclick="startAuction()">Start Auction</button></div>
+        <p class="hint">Minimum 2 players recommended. Share the room code with friends.</p>
+      </div>
+    </section>
+
+    <section id="auction" class="screen">
+      <div class="auctionHeader">
+        <div><small>Room</small><b id="auctionRoomCode">------</b></div>
+        <div><small>Your Purse</small><b id="myPurse">100.00 Cr</b></div>
+        <div><small>Timer</small><b id="timerText">--</b></div>
+        <div><small>Squad</small><b id="mySquadCount">0/15</b></div>
+      </div>
+
+      <div class="auctionGrid">
+        <div class="playerCard" id="playerCard">
+          <div class="rating" id="playerRating">--</div>
+          <div class="playerPhoto" id="playerPhoto">⚽</div>
+          <h2 id="playerName">Waiting...</h2>
+          <p id="playerMeta">Host will start the auction</p>
+          <div class="priceRow"><span>Base</span><b id="basePrice">--</b></div>
+          <div class="priceRow live"><span>Current Bid</span><b id="currentBid">--</b></div>
+          <div class="highest" id="highestBidder">No bids yet</div>
+          <div class="warn" id="bidWarning"></div>
+        </div>
+
+        <div class="card bidPanel">
+          <h3>Bid Panel</h3>
+          <div class="bidButtons">
+            <button onclick="placeBid(10)">+10 L</button>
+            <button onclick="placeBid(25)">+25 L</button>
+            <button onclick="placeBid(50)">+50 L</button>
+            <button onclick="placeBid(100)">+1 Cr</button>
+          </div>
+          <label>Custom bid in lakhs</label>
+          <div class="inline"><input id="customBid" type="number" placeholder="Example: 150"/><button onclick="customBid()">Bid</button></div>
+          <div id="hostControls" class="hostControls hidden">
+            <h3>Host Controls</h3>
+            <button class="bigBtn success" onclick="sellPlayer()">Sell Player</button>
+            <button class="bigBtn" onclick="unsoldPlayer()">Unsold</button>
+            <button class="bigBtn danger" onclick="endAuction()">End Auction</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Squad Rules</h3>
+          <div id="squadRules" class="rulesGrid"></div>
+        </div>
+
+        <div class="card">
+          <h3>Live Bidders</h3>
+          <div id="liveBidders" class="playersList"></div>
+        </div>
+
+        <div class="card">
+          <h3>My Squad</h3>
+          <div id="mySquad" class="squad"></div>
+        </div>
+
+        <div class="card">
+          <h3>Sold Players</h3>
+          <div id="soldTable" class="squad"></div>
+        </div>
+
+        <div class="card wide">
+          <h3>Auction History</h3>
+          <div id="historyLog" class="history"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="screen">
+      <div class="top"><h2>Final Leaderboard</h2></div>
+      <div id="leaderboard" class="leaderboard"></div>
+      <button class="bigBtn primary" onclick="goHome()">Back Home</button>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js"></script>
+  <script src="players.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
