@@ -10,13 +10,17 @@
 </head>
 <body>
   <script>
-  const sitePassword = "football2026";
-  const entered = prompt("Enter website password");
+const sitePassword = "macha2026";
+const entered = prompt("Enter Website Password");
 
-  if (entered !== sitePassword) {
-    document.body.innerHTML = "<h1 style='text-align:center;margin-top:100px;'>Access Denied</h1>";
-    throw new Error("Wrong password");
-  }
+if (entered !== sitePassword) {
+  document.documentElement.innerHTML = `
+    <body style="margin:0;background:#06130e;color:white;font-family:Arial;display:grid;place-items:center;height:100vh;">
+      <h1>❌ Access Denied</h1>
+    </body>
+  `;
+  throw new Error("Wrong password");
+}
 </script>
   <div class="bg"></div>
   <main class="app">
