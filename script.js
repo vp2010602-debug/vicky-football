@@ -271,4 +271,11 @@ async function saveManualXI(){
 
   alert("Formation saved successfully 🔥");
 }
-if(roomCode)listenRoom();
+if (window.location.search.includes("fresh=1")) {
+  localStorage.removeItem("faa_room");
+  localStorage.removeItem("faa_host");
+  localStorage.removeItem("faa_name");
+  window.location.href = window.location.pathname;
+} else if (roomCode) {
+  listenRoom();
+}
