@@ -46,8 +46,8 @@ async function createRoom(){
   if(!name)return alert("Enter your name macha");
   roomCode=makeCode(); myName=name; isHost=true;
   localStorage.setItem("faa_room",roomCode); localStorage.setItem("faa_name",myName); localStorage.setItem("faa_host","yes");
-  const budget=Number($("budgetSelect").value), timer=Number($("timerSelect").value), pin=$("hostPin").value.trim()||"1234";
-  await db.ref("rooms/"+roomCode).set({createdAt:Date.now(),status:"lobby",hostId:myId,hostPin:pin,budget,timer,index:0,currentBid:0,highestBidderId:"",highestBidderName:"",sold:{},unsold:{},history:{},players:shuffle(PLAYERS)});
+  const budget=Number($("budgetSelect").value);, pin=$("hostPin").value.trim()||"1234";
+  await db.ref("rooms/"+roomCode).set({createdAt:Date.now(),status:"lobby",hostId:myId,hostPin:pin,budget,index:0,currentBid:0,highestBidderId:"",highestBidderName:"",sold:{},unsold:{},history:{},players:shuffle(PLAYERS)});
   await db.ref(`rooms/${roomCode}/users/${myId}`).set({name:myName,team:team,logo:logo,purse:budget,squad:{},score:0,joinedAt:Date.now()});
   listenRoom(); show("lobby");
 }
@@ -125,14 +125,14 @@ function canBid(me,p,nextBid){
 
 async function startAuction(){
   if(!isHost)return; const userCount=Object.keys(room.users||{}).length; if(userCount<2 && !confirm("Only 1 player in lobby. Start anyway?"))return;
-  const p=room.players[0]; await db.ref("rooms/"+roomCode).update({status:"auction",index:0,currentBid:p.base,highestBidderId:"",highestBidderName:"",bidEndAt:Date.now()+(room.timer||30)*1000});
+  const p=room.players[0]; await db.ref("rooms/"+roomCode).update({status:"auction",index:0,currentBid:p.base,highestBidderId:"",highestBidderName:""});
   addHistory("Auction started");
 }
 async function placeBid(addLakhs){
   if(!room||room.status!=="auction")return alert("Auction not active");
   const me=(room.users||{})[myId], p=room.players[room.index], nextBid=Math.max(room.currentBid||p.base,p.base)+Number(addLakhs);
   const err=canBid(me,p,nextBid); if(err)return alert(err);
-  await db.ref("rooms/"+roomCode).update({currentBid:nextBid,highestBidderId:myId,highestBidderName:myName,bidEndAt:Date.now()+15000});
+  await db.ref("rooms/"+roomCode).update({currentBid:nextBid,highestBidderId:myId,highestBidderName:myName});
   addHistory(`${myName} bid ${money(nextBid)} for ${p.name}`);
 }
 function customBid(){const v=Number($("customBid").value); if(!v||v<=0)return alert("Enter lakhs amount"); placeBid(v); $("customBid").value=""}
@@ -153,19 +153,11 @@ async function unsoldPlayer(){
 async function nextPlayerUpdates(updates){
   const nextIndex=room.index+1;
   if(nextIndex>=room.players.length){updates.status="ended";return}
-  const np=room.players[nextIndex]; updates.index=nextIndex; updates.currentBid=np.base; updates.highestBidderId=""; updates.highestBidderName=""; updates.bidEndAt=Date.now()+(room.timer||30)*1000;
-}
+  const np=room.players[nextIndex]; updates.index=nextIndex; updates.currentBid=np.base; updates.highestBidderId=""; updates.highestBidderName=""; 
 async function endAuction(){if(confirm("End auction now?")){await db.ref("rooms/"+roomCode).update({status:"ended"});addHistory("Auction ended")}}
 
-/* Auto-sell when timer reaches zero. Only host device performs it. */
 function updateTimer(){
-  clearInterval(timerInterval);
-  timerInterval=setInterval(async()=>{
-    if(!room||room.status!=="auction")return;
-    const left=Math.max(0,Math.ceil(((room.bidEndAt||Date.now())-Date.now())/1000)); $("timerText").textContent=left+"s";
-    const key=room.index+"_"+(room.bidEndAt||0);
-    if(left<=0 && isHost && autoSoldKey!==key){autoSoldKey=key; room.highestBidderId ? await sellPlayer() : await unsoldPlayer();}
-  },300);
+  $("timerText").textContent = "Manual";
 }
 
 function renderResults(){
