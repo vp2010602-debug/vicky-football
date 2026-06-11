@@ -131,6 +131,23 @@
 
     <section id="results" class="screen">
       <div class="top"><h2>Final Leaderboard</h2></div>
+      <div class="card">
+      <h3>Build My Formation</h3>
+
+      <label>Select Formation</label>
+      <select id="formationSelect" onchange="changeFormation()">
+      <option value="433">4-3-3</option>
+      <option value="442">4-4-2</option>
+      <option value="352">3-5-2</option>
+     </select>
+
+  <div id="formationPitch" class="pitch"></div>
+
+  <h3>My Available Players</h3>
+  <div id="formationSquad" class="squad"></div>
+
+  <button class="bigBtn primary" onclick="saveManualXI()">Save My XI</button>
+</div>
       <div id="leaderboard" class="leaderboard"></div>
       <button class="bigBtn primary" onclick="goHome()">Back Home</button>
     </section>
