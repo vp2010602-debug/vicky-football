@@ -13,6 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+
 const SQUAD_MAX = 15;
 const RULES = {GK:{min:2,max:3}, DEF:{min:4,max:6}, MID:{min:4,max:6}, FWD:{min:2,max:5}};
 const MIN_BASE_LEFT = 100; // 1 Cr reserved per remaining empty squad slot
