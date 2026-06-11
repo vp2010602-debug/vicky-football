@@ -46,7 +46,8 @@ async function createRoom(){
   if(!name)return alert("Enter your name macha");
   roomCode=makeCode(); myName=name; isHost=true;
   localStorage.setItem("faa_room",roomCode); localStorage.setItem("faa_name",myName); localStorage.setItem("faa_host","yes");
-  const budget=Number($("budgetSelect").value);, pin=$("hostPin").value.trim()||"1234";
+  const budget = Number($("budgetSelect").value);
+  const pin = $("hostPin").value.trim() || "1234";
   await db.ref("rooms/"+roomCode).set({createdAt:Date.now(),status:"lobby",hostId:myId,hostPin:pin,budget,index:0,currentBid:0,highestBidderId:"",highestBidderName:"",sold:{},unsold:{},history:{},players:shuffle(PLAYERS)});
   await db.ref(`rooms/${roomCode}/users/${myId}`).set({name:myName,team:team,logo:logo,purse:budget,squad:{},score:0,joinedAt:Date.now()});
   listenRoom(); show("lobby");
@@ -153,7 +154,7 @@ async function unsoldPlayer(){
 async function nextPlayerUpdates(updates){
   const nextIndex=room.index+1;
   if(nextIndex>=room.players.length){updates.status="ended";return}
-  const np=room.players[nextIndex]; updates.index=nextIndex; updates.currentBid=np.base; updates.highestBidderId=""; updates.highestBidderName=""; 
+  const np=room.players[nextIndex]; updates.index=nextIndex; updates.currentBid=np.base; updates.highestBidderId=""; updates.highestBidderName="";} 
 async function endAuction(){if(confirm("End auction now?")){await db.ref("rooms/"+roomCode).update({status:"ended"});addHistory("Auction ended")}}
 
 function updateTimer(){
