@@ -166,6 +166,7 @@ function updateTimer(){
 }
 
 function renderResults(){
+  buildFormationScreen();
   const users=Object.values(room.users||{}).map(u=>({...u,final:finalScore(u),xi:bestXI(u)})).sort((a,b)=>b.final-a.final);
   $("leaderboard").innerHTML=users.map((u,i)=>{
     const c=counts(u), squad=squadArr(u);
