@@ -40,22 +40,25 @@ function bestXI(u){let s=squadArr(u).sort((a,b)=>b.rating-a.rating);let need={GK
 function finalScore(u){let xi=bestXI(u), score=xi.reduce((a,p)=>a+p.rating,0); if(squadComplete(u))score+=25; if(fullSquadComplete(u))score+=50; score+=Math.floor((u.purse||0)/1000); return score}
 
 async function createRoom(){
-  const name=$("hostName").value.trim(); if(!name)return alert("Enter your name macha");
+  const name=$("hostName").value.trim(); 
+  const team=$("hostTeam").value.trim() || name + " FC";
+  const logo=$("hostLogo").value.trim() || "⚽";
+  if(!name)return alert("Enter your name macha");
   roomCode=makeCode(); myName=name; isHost=true;
   localStorage.setItem("faa_room",roomCode); localStorage.setItem("faa_name",myName); localStorage.setItem("faa_host","yes");
   const budget=Number($("budgetSelect").value), timer=Number($("timerSelect").value), pin=$("hostPin").value.trim()||"1234";
   await db.ref("rooms/"+roomCode).set({createdAt:Date.now(),status:"lobby",hostId:myId,hostPin:pin,budget,timer,index:0,currentBid:0,highestBidderId:"",highestBidderName:"",sold:{},unsold:{},history:{},players:shuffle(PLAYERS)});
-  await db.ref(`rooms/${roomCode}/users/${myId}`).set({name:myName,purse:budget,squad:{},score:0,joinedAt:Date.now()});
+  await db.ref(`rooms/${roomCode}/users/${myId}`).set({name:myName,team:team,logo:logo,purse:budget,squad:{},score:0,joinedAt:Date.now()});
   listenRoom(); show("lobby");
 }
 
 async function joinRoom(){
-  const name=$("joinName").value.trim(), code=$("roomCodeInput").value.trim().toUpperCase();
+  const name=$("joinName").value.trim(), team=$("joinTeam").value.trim() || name + " FC", logo=$("joinLogo").value.trim() || "⚽", code=$("roomCodeInput").value.trim().toUpperCase();
   if(!name||!code)return alert("Enter name and room code");
   const snap=await db.ref("rooms/"+code).get(); if(!snap.exists())return alert("Room not found");
   roomCode=code; myName=name; isHost=false; localStorage.setItem("faa_room",roomCode); localStorage.setItem("faa_name",myName); localStorage.setItem("faa_host","no");
   const data=snap.val(), userCount=data.users?Object.keys(data.users).length:0; if(userCount>=8)return alert("Room full. Maximum 8 players.");
-  await db.ref(`rooms/${roomCode}/users/${myId}`).set({name:myName,purse:data.budget||10000,squad:{},score:0,joinedAt:Date.now()});
+  await db.ref(`rooms/${roomCode}/users/${myId}`).set({name:myName,team:team,logo:logo,purse:data.budget||10000,squad:{},score:0,joinedAt:Date.now()});
   listenRoom(); show(data.status==="auction"?"auction":"lobby");
 }
 
@@ -73,7 +76,7 @@ function render(){
 
 function renderLobby(){
   const users=room.users||{};
-  $("lobbyPlayers").innerHTML=Object.entries(users).map(([id,u])=>`<div class="person"><b>${u.name}${id===room.hostId?" 👑":""}</b><span>${money(u.purse||room.budget)}</span></div>`).join("");
+  $("lobbyPlayers").innerHTML=Object.entries(users).map(([id,u])=>`<div class="person"><b>${u.logo || "⚽"} ${u.team || u.name}${id===room.hostId?" 👑":""}</b><span>${money(u.purse||room.budget)}</span></div>`).join("");
   $("hostLobbyControls").classList.toggle("hidden",!isHost);
 }
 function renderAuction(){
