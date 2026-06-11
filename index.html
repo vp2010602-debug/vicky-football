@@ -41,6 +41,11 @@ if (entered !== sitePassword) {
       <div class="top"><button onclick="goHome()">←</button><h2>Create Room</h2></div>
       <div class="card">
         <label>Your Name</label><input id="hostName" placeholder="Example: Vignesh"/>
+        <label>Your Team Name</label>
+        <input id="hostTeam" placeholder="Example: Vicky FC"/>
+
+        <label>Team Logo Emoji</label>
+        <input id="hostLogo" placeholder="Example: 🔥"/>
         <label>Budget</label><select id="budgetSelect"><option value="10000">100 Cr</option><option value="20000">200 Cr</option></select>
         <label>Timer per player</label><select id="timerSelect"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select>
         <label>Host PIN</label><input id="hostPin" placeholder="Example: 1234" maxlength="8"/>
@@ -52,6 +57,11 @@ if (entered !== sitePassword) {
       <div class="top"><button onclick="goHome()">←</button><h2>Join Room</h2></div>
       <div class="card">
         <label>Your Name</label><input id="joinName" placeholder="Example: Rohit"/>
+        <label>Your Team Name</label>
+        <input id="joinTeam" placeholder="Example: Delhi Warriors"/>
+
+        <label>Team Logo Emoji</label>
+        <input id="joinLogo" placeholder="Example: 🦁"/>
         <label>Room Code</label><input id="roomCodeInput" placeholder="Example: AB12CD" maxlength="6"/>
         <button class="bigBtn primary" onclick="joinRoom()">Join Auction</button>
       </div>
